@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SentiJKN — Analisis Sentimen Ulasan Mobile JKN</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='sentijkn.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <img
+          src="{{ url_for('static', filename='logoJkn.png') }}"
+          alt="Logo Website"
+          class="nav-custom-logo"
+        />
+        <div class="nav-info">
+          <span class="nav-title">AnalizeJKN</span>
+          <span class="nav-sub">Analisis Sentimen Ulasan Mobile JKN</span>
+        </div>
+      </div>
+
+      <div class="nav-menu">
+        <a href="#sec-preprocessing" class="nav-link">Preprocessing</a>
+        <a href="#sec-hasil" class="nav-link">Hasil Sentimen</a>
+        <a href="#sec-metrik" class="nav-link">Metrik Model</a>
+        <a href="#sec-tfidf" class="nav-link">TF-IDF</a>
+        <a href="#sec-cek" class="nav-link">Cek Kalimat</a>
+      </div>
+      <span class="nav-badge">
+        <i class="ti ti-calendar-event"></i>
+        <span id="realtime-date">Memuat tanggal...</span>
+      </span>
+    </nav>
+
+    <main class="page">
+      <!-- ===== SECTION 1: PREPROCESSING DATA ===== -->
+      <section class="section" id="sec-preprocessing">
+        <p class="sec-label">
+          <i class="ti ti-database"></i> Hasil preprocessing data
+        </p>
+        <div class="card">
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-val">{{ db_data.dataset.total }}</div>
+              <div class="metric-lbl">
+                <i class="ti ti-messages"></i> Total ulasan
+              </div>
+            </div>
+            <div class="metric">
+              <div class="metric-val pos">1085</div>
+              <div class="metric-lbl">
+                <i class="ti ti-mood-happy"></i> Positif
+              </div>
+            </div>
+            <div class="metric">
+              <div class="metric-val neg">3915</div>
+              <div class="metric-lbl">
+                <i class="ti ti-mood-sad"></i> Negatif
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col style="width: 36px" />
+                <col style="width: 35%" />
+                <col style="width: 33%" />
+                <col style="width: 50px" />
+                <col style="width: 80px" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ulasan asli</th>
+                  <th>Hasil preprocessing</th>
+                  <th>Token</th>
+                  <th>Sentimen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table_data %}
+                <tr>
+                  <td class="td-muted">{{ loop.index }}</td>
+                  <td>{{ row.content }}</td>
+                  <td class="mono">{{ row.text_akhir }}</td>
+                  <td>{{ row.text_length }}</td>
+
+                  <td>
+                    {% if row.polarity == 'positive' %}
+                    <span class="badge-pos">Positif</span>
+                    {% elif row.polarity == 'negative' %}
+                    <span class="badge-neg">Negatif</span>
+                    {% else %}
+                    <span
+                      class="badge-neu"
+                      style="
+                        background: #ddd;
+                        color: #333;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                      "
+                      >Netral</span
+                    >
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 2: HASIL ANALISIS SENTIMEN ===== -->
+      <section class="section" id="sec-hasil">
+        <p class="sec-label">
+          <i class="ti ti-chart-pie"></i> Hasil analisis sentimen
+        </p>
+        <div class="chart-row two-col">
+          <div class="chart-card">
+            <p class="chart-title">Distribusi sentimen</p>
+            <p class="chart-sub">5000 ulasan total</p>
+            <div class="legend-row">
+              <span class="legend-item"
+                ><span class="leg-sq" style="background: #639922"></span>Positif
+                21.7%</span
+              >
+              <span class="legend-item"
+                ><span class="leg-sq" style="background: #e24b4a"></span>Negatif
+                78.3%</span
+              >
+            </div>
+            <div class="chart-canvas-wrap" style="height: 200px">
+              <canvas
+                id="pieChart"
+                role="img"
+                aria-label="Pie chart distribusi sentimen: Positif 63%, Negatif 37%"
+                >Positif 21.7%, Negatif 78.3%</canvas
+              >
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <p class="chart-title">Akurasi model</p>
+            <p class="chart-sub">SVM vs Naive Bayes</p>
+            <div class="legend-row">
+              <span class="legend-item"
+                ><span class="leg-sq" style="background: #185fa5"></span
+                >SVM</span
+              >
+              <span class="legend-item"
+                ><span class="leg-sq" style="background: #1d9e75"></span>Naive
+                Bayes</span
+              >
+            </div>
+            <div class="chart-canvas-wrap" style="height: 200px">
+              <canvas
+                id="accChart"
+                role="img"
+                aria-label="Bar chart perbandingan akurasi SVM dan Naive Bayes"
+                >Perbandingan akurasi SVM dan Naive Bayes</canvas
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 3: METRIK EVALUASI ===== -->
+      <section class="section" id="sec-metrik">
+        <p class="sec-label">
+          <i class="ti ti-report-analytics"></i> Metrik evaluasi model
+        </p>
+        <div class="chart-row two-col">
+          <div class="chart-card">
+            <p class="chart-title">Support Vector Machine (SVM)</p>
+            <p class="chart-sub">
+              Classification report &amp; confusion matrix
+            </p>
+
+            <table class="metrik-tbl">
+              <thead>
+                <tr>
+                  <th>Kelas</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1-Score</th>
+                  <th>Support</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-pos">Positif</span></td>
+                  <td>{{ db_data.metrics.svm.report.pos.precision }}</td>
+                  <td>{{ db_data.metrics.svm.report.pos.recall }}</td>
+                  <td>{{ db_data.metrics.svm.report.pos.f1 }}</td>
+                  <td>{{ db_data.metrics.svm.report.pos.support }}</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-neg">Negatif</span></td>
+                  <td>{{ db_data.metrics.svm.report.neg.precision }}</td>
+                  <td>{{ db_data.metrics.svm.report.neg.recall }}</td>
+                  <td>{{ db_data.metrics.svm.report.neg.f1 }}</td>
+                  <td>{{ db_data.metrics.svm.report.neg.support }}</td>
+                </tr>
+                <tr class="avg-row">
+                  <td class="td-muted small">Avg / total</td>
+                  <td>{{ db_data.metrics.svm.report.avg.precision }}</td>
+                  <td>{{ db_data.metrics.svm.report.avg.recall }}</td>
+                  <td>{{ db_data.metrics.svm.report.avg.f1 }}</td>
+                  <td>{{ db_data.metrics.svm.report.avg.support }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="divider"></div>
+            <p class="sub-section-lbl">Confusion matrix</p>
+
+            <div class="cm-wrap">
+              <div class="cm-layout">
+                <div class="cm-header-row">
+                  <div class="cm-axis-spacer"></div>
+                  <div class="cm-col-label">Pred. Positif</div>
+                  <div class="cm-col-label">Pred. Negatif</div>
+                </div>
+                <div class="cm-data-row">
+                  <div class="cm-row-label">Aktual Positif</div>
+                  <div class="cm-cell tp">
+                    <span class="cm-val">{{ db_data.metrics.svm.cm.tp }}</span>
+                    <span class="cm-cell-lbl">TP</span>
+                  </div>
+                  <div class="cm-cell fn">
+                    <span class="cm-val">{{ db_data.metrics.svm.cm.fn }}</span>
+                    <span class="cm-cell-lbl">FN</span>
+                  </div>
+                </div>
+                <div class="cm-data-row">
+                  <div class="cm-row-label">Aktual Negatif</div>
+                  <div class="cm-cell fp">
+                    <span class="cm-val">{{ db_data.metrics.svm.cm.fp }}</span>
+                    <span class="cm-cell-lbl">FP</span>
+                  </div>
+                  <div class="cm-cell tn">
+                    <span class="cm-val">{{ db_data.metrics.svm.cm.tn }}</span>
+                    <span class="cm-cell-lbl">TN</span>
+                  </div>
+                </div>
+              </div>
+              <div class="cm-accuracy">
+                Akurasi: <strong>{{ db_data.metrics.svm.accuracy }}%</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <p class="chart-title">Naive Bayes</p>
+            <p class="chart-sub">
+              Classification report &amp; confusion matrix
+            </p>
+
+            <table class="metrik-tbl">
+              <thead>
+                <tr>
+                  <th>Kelas</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1-Score</th>
+                  <th>Support</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-pos">Positif</span></td>
+                  <td>{{ db_data.metrics.nb.report.pos.precision }}</td>
+                  <td>{{ db_data.metrics.nb.report.pos.recall }}</td>
+                  <td>{{ db_data.metrics.nb.report.pos.f1 }}</td>
+                  <td>{{ db_data.metrics.nb.report.pos.support }}</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-neg">Negatif</span></td>
+                  <td>{{ db_data.metrics.nb.report.neg.precision }}</td>
+                  <td>{{ db_data.metrics.nb.report.neg.recall }}</td>
+                  <td>{{ db_data.metrics.nb.report.neg.f1 }}</td>
+                  <td>{{ db_data.metrics.nb.report.neg.support }}</td>
+                </tr>
+                <tr class="avg-row">
+                  <td class="td-muted small">Avg / total</td>
+                  <td>{{ db_data.metrics.nb.report.avg.precision }}</td>
+                  <td>{{ db_data.metrics.nb.report.avg.recall }}</td>
+                  <td>{{ db_data.metrics.nb.report.avg.f1 }}</td>
+                  <td>{{ db_data.metrics.nb.report.avg.support }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="divider"></div>
+            <p class="sub-section-lbl">Confusion matrix</p>
+
+            <div class="cm-wrap">
+              <div class="cm-layout">
+                <div class="cm-header-row">
+                  <div class="cm-axis-spacer"></div>
+                  <div class="cm-col-label">Pred. Positif</div>
+                  <div class="cm-col-label">Pred. Negatif</div>
+                </div>
+                <div class="cm-data-row">
+                  <div class="cm-row-label">Aktual Positif</div>
+                  <div class="cm-cell tp">
+                    <span class="cm-val">{{ db_data.metrics.nb.cm.tp }}</span>
+                    <span class="cm-cell-lbl">TP</span>
+                  </div>
+                  <div class="cm-cell fn">
+                    <span class="cm-val">{{ db_data.metrics.nb.cm.fn }}</span>
+                    <span class="cm-cell-lbl">FN</span>
+                  </div>
+                </div>
+                <div class="cm-data-row">
+                  <div class="cm-row-label">Aktual Negatif</div>
+                  <div class="cm-cell fp">
+                    <span class="cm-val">{{ db_data.metrics.nb.cm.fp }}</span>
+                    <span class="cm-cell-lbl">FP</span>
+                  </div>
+                  <div class="cm-cell tn">
+                    <span class="cm-val">{{ db_data.metrics.nb.cm.tn }}</span>
+                    <span class="cm-cell-lbl">TN</span>
+                  </div>
+                </div>
+              </div>
+              <div class="cm-accuracy">
+                Akurasi: <strong>{{ db_data.metrics.nb.accuracy }}%</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 4: TF-IDF ===== -->
+      <section class="section" id="sec-tfidf">
+        <p class="sec-label"><i class="ti ti-file-text"></i> Bobot TF-IDF</p>
+        <div class="chart-row two-col">
+          <div class="chart-card">
+            <p class="chart-title">Top kata — ulasan positif</p>
+            <p class="chart-sub">Kata dengan bobot TF-IDF tertinggi</p>
+            <div id="tfidf-pos"></div>
+          </div>
+
+          <div class="chart-card">
+            <p class="chart-title">Top kata — ulasan negatif</p>
+            <p class="chart-sub">Kata dengan bobot TF-IDF tertinggi</p>
+            <div id="tfidf-neg"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px">
+          <p class="chart-title">Tabel TF-IDF per dokumen (sampel)</p>
+          <p class="chart-sub" style="margin-bottom: 14px">
+            Nilai TF-IDF tiap kata pada 3 ulasan teratas dari dataset aslimu
+          </p>
+          <div class="table-wrap">
+            <table class="tfidf-sample-tbl">
+              <thead>
+                <tr>
+                  <th>Dokumen</th>
+                  {% for word in db_data.tfidf_data.sample_columns %}
+                  <th>{{ word }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in db_data.tfidf_data.sample_rows %}
+                <tr>
+                  <td class="td-muted small">{{ row.doc }}</td>
+                  {% for word in db_data.tfidf_data.sample_columns %}
+                  <td>{{ row[word] }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 5: CEK KALIMAT ===== -->
+      <section class="section" id="sec-cek">
+        <p class="sec-label">
+          <i class="ti ti-text-scan-2"></i> Cek kalimat — inferensi model
+        </p>
+        <div class="card cek-card">
+          <p class="cek-desc">
+            Masukkan ulasan untuk dianalisis sentimen-nya menggunakan kedua
+            algoritma.
+          </p>
+
+          <textarea
+            id="inputKalimat"
+            class="input-area"
+            placeholder="Contoh: Aplikasi JKN sangat membantu saya untuk cek antrean puskesmas..."
+          ></textarea>
+
+          <button class="analyze-btn" onclick="analyzeKalimat()">
+            <i class="ti ti-player-play"></i> Analisis sekarang
+          </button>
+
+          <div class="loading-dots" id="loadingDots">
+            <span></span><span></span><span></span>
+          </div>
+
+          <!-- Hasil -->
+          <div id="hasilKlasifikasi" class="hasil-wrap" style="display: none">
+            <div class="divider" style="margin-top: 16px"></div>
+            <p class="sub-section-lbl">Hasil klasifikasi</p>
+
+            <div class="result-grid">
+              <div class="result-box" id="svmBox">
+                <div class="result-algo">
+                  <span class="algo-dot" style="background: #185fa5"></span>
+                  Support Vector Machine
+                </div>
+                <div class="result-label" id="svmLabel">—</div>
+                <div class="result-conf" id="svmConf">Confidence: —</div>
+                <div class="conf-bar">
+                  <div
+                    class="conf-fill"
+                    id="svmBar"
+                    style="background: #185fa5; width: 0%"
+                  ></div>
+                </div>
+              </div>
+              <div class="result-box" id="nbBox">
+                <div class="result-algo">
+                  <span class="algo-dot" style="background: #1d9e75"></span>
+                  Naive Bayes
+                </div>
+                <div class="result-label" id="nbLabel">—</div>
+                <div class="result-conf" id="nbConf">Confidence: —</div>
+                <div class="conf-bar">
+                  <div
+                    class="conf-fill"
+                    id="nbBar"
+                    style="background: #1d9e75; width: 0%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preprocessing Steps -->
+            <div class="divider"></div>
+            <p class="sub-section-lbl">Tahapan preprocessing</p>
+            <div class="preprocess-grid">
+              <div class="pp-step">
+                <div class="pp-title">
+                  <i class="ti ti-wash-dry-hang"></i> Cleansing
+                </div>
+                <div class="pp-text" id="ppCleansing">
+                  <span class="pp-empty">–</span>
+                </div>
+              </div>
+              <div class="pp-step">
+                <div class="pp-title">
+                  <i class="ti ti-letter-case"></i> Case folding
+                </div>
+                <div class="pp-text" id="ppCase">
+                  <span class="pp-empty">–</span>
+                </div>
+              </div>
+              <div class="pp-step">
+                <div class="pp-title">
+                  <i class="ti ti-scissors"></i> Tokenizing
+                </div>
+                <div class="pp-text" id="ppToken">
+                  <span class="pp-empty">–</span>
+                </div>
+              </div>
+              <div class="pp-step">
+                <div class="pp-title">
+                  <i class="ti ti-filter"></i> Stopword removal
+                </div>
+                <div class="pp-text" id="ppStop">
+                  <span class="pp-empty">–</span>
+                </div>
+              </div>
+              <div class="pp-step pp-full">
+                <div class="pp-title">
+                  <i class="ti ti-arrows-join"></i> Stemming
+                </div>
+                <div class="pp-text" id="ppStem">
+                  <span class="pp-empty">–</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- TF-IDF hasil input -->
+            <div class="divider"></div>
+            <p class="sub-section-lbl">Bobot TF-IDF kalimat ini</p>
+            <div id="tfidfInput"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        SentiJKN &mdash; Tugas Akhir Analisis Sentimen Mobile JKN &middot; SVM
+        &amp; Naive Bayes
+      </p>
+    </footer>
+
+    <script>
+      // Mengambil data dari Flask dan menjadikannya variabel global JavaScript
+          const dynamicData = {{ db_data | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='sentijkn.js') }}"></script>
+  </body>
+</html>

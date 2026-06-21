@@ -1,0 +1,120 @@
+{
+  "dataset": { "total": 5000, "positif": 1074, "negatif": 3926 },
+  "metrics": {
+    "svm": {
+      "accuracy": 95.5,
+      "report": {
+        "pos": {
+          "precision": "0.98",
+          "recall": "0.93",
+          "f1": "0.95",
+          "support": 769
+        },
+        "neg": {
+          "precision": "0.94",
+          "recall": "0.98",
+          "f1": "0.96",
+          "support": 802
+        },
+        "avg": {
+          "precision": "0.96",
+          "recall": "0.95",
+          "f1": "0.96",
+          "support": 1571
+        }
+      },
+      "cm": { "tp": 716, "fn": 53, "fp": 17, "tn": 785 }
+    },
+    "nb": {
+      "accuracy": 81.4,
+      "report": {
+        "pos": {
+          "precision": "0.87",
+          "recall": "0.72",
+          "f1": "0.79",
+          "support": 769
+        },
+        "neg": {
+          "precision": "0.77",
+          "recall": "0.90",
+          "f1": "0.83",
+          "support": 802
+        },
+        "avg": {
+          "precision": "0.82",
+          "recall": "0.81",
+          "f1": "0.81",
+          "support": 1571
+        }
+      },
+      "cm": { "tp": 557, "fn": 212, "fp": 80, "tn": 722 }
+    }
+  },
+  "tfidf_data": {
+    "pos": [
+      { "w": "mudah", "v": 0.094 },
+      { "w": "membantu", "v": 0.065 },
+      { "w": "jkn", "v": 0.044 },
+      { "w": "login", "v": 0.035 },
+      { "w": "cepat", "v": 0.033 },
+      { "w": "pelayanan", "v": 0.033 },
+      { "w": "tolong", "v": 0.027 },
+      { "w": "mobile", "v": 0.027 }
+    ],
+    "neg": [
+      { "w": "aplikasi", "v": 0.082 },
+      { "w": "daftar", "v": 0.056 },
+      { "w": "masuk", "v": 0.055 },
+      { "w": "susah", "v": 0.042 },
+      { "w": "otp", "v": 0.042 },
+      { "w": "kode", "v": 0.041 },
+      { "w": "login", "v": 0.041 },
+      { "w": "verifikasi", "v": 0.037 }
+    ],
+    "sample_columns": [
+      "aplikasi",
+      "daftar",
+      "masuk",
+      "login",
+      "otp",
+      "kode",
+      "susah",
+      "verifikasi"
+    ],
+    "sample_rows": [
+      {
+        "doc": "Ulasan 1",
+        "aplikasi": 0.0,
+        "daftar": 0.106,
+        "masuk": 0.0,
+        "login": 0.0,
+        "otp": 0.0,
+        "kode": 0.0,
+        "susah": 0.13,
+        "verifikasi": 0.0
+      },
+      {
+        "doc": "Ulasan 2",
+        "aplikasi": 0.083,
+        "daftar": 0.0,
+        "masuk": 0.0,
+        "login": 0.0,
+        "otp": 0.121,
+        "kode": 0.122,
+        "susah": 0.253,
+        "verifikasi": 0.0
+      },
+      {
+        "doc": "Ulasan 3",
+        "aplikasi": 0.26,
+        "daftar": 0.215,
+        "masuk": 0.237,
+        "login": 0.0,
+        "otp": 0.126,
+        "kode": 0.128,
+        "susah": 0.0,
+        "verifikasi": 0.0
+      }
+    ]
+  }
+}
